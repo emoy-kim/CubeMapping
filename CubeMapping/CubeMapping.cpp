@@ -19,11 +19,11 @@ CameraGL::CameraGL(
    float near_plane,
    float far_plane
 ) : 
-   ZOOM_SENSITIVITY( 2.0f ), MOVE_SENSITIVITY( 5.0f ), ROTATE_SENSITIVITY( 0.01f ), IsMoving( false ),
+   ZoomSensitivity( 2.0f ), MoveSensitivity( 5.0f ), RotationSensitivity( 0.01f ), IsMoving( false ),
    AspectRatio( 0.0f ), InitFOV( fov ), NearPlane( near_plane ), FarPlane( far_plane ), 
    InitCamPos( cam_position ), InitRefPos( view_reference_position ), InitUpVec( view_up_vector ), 
-   FOV( fov ), CamPos( cam_position ), RefPos( view_reference_position ), UpVec( view_up_vector ),
-   ViewMatrix( lookAt( CamPos, RefPos, UpVec ) ), ProjectionMatrix( mat4(1.0f) )
+   FOV( fov ), CamPos( cam_position ),
+   ViewMatrix( lookAt( InitCamPos, InitRefPos, InitUpVec ) ), ProjectionMatrix( mat4(1.0f) )
 {
 }
 
@@ -37,52 +37,74 @@ void CameraGL::setMovingState(bool is_moving)
    IsMoving = is_moving;
 }
 
+void CameraGL::updateCamera()
+{
+   const mat4 inverse_view = inverse( ViewMatrix );
+   CamPos.x = inverse_view[3][0];
+   CamPos.y = inverse_view[3][1];
+   CamPos.z = inverse_view[3][2];
+}
+
 void CameraGL::pitch(int angle)
 {
    const vec3 u_axis(ViewMatrix[0][0], ViewMatrix[1][0], ViewMatrix[2][0]);
-   ViewMatrix = glm::rotate( ViewMatrix, static_cast<float>(angle) * ROTATE_SENSITIVITY, u_axis );
+   ViewMatrix = glm::rotate( ViewMatrix, static_cast<float>(angle) * RotationSensitivity, u_axis );
+   updateCamera();
 }
 
 void CameraGL::yaw(int angle)
 {
    const vec3 v_axis(ViewMatrix[0][1], ViewMatrix[1][1], ViewMatrix[2][1]);
-   ViewMatrix = glm::rotate( ViewMatrix, static_cast<float>(angle) * ROTATE_SENSITIVITY, v_axis );
+   ViewMatrix = glm::rotate( ViewMatrix, static_cast<float>(angle) * RotationSensitivity, v_axis );
+   updateCamera();
 }
 
 void CameraGL::moveForward()
 {
-   ViewMatrix = translate( ViewMatrix, MOVE_SENSITIVITY * vec3( 0.0f, 0.0f, -1.0f ) );
+   const vec3 n_axis(ViewMatrix[0][2], ViewMatrix[1][2], ViewMatrix[2][2]);
+   ViewMatrix = translate( ViewMatrix, MoveSensitivity * n_axis );
+   updateCamera();
 }
 
 void CameraGL::moveBackward()
 {
-   ViewMatrix = translate( ViewMatrix, MOVE_SENSITIVITY * vec3( 0.0f, 0.0f, 1.0f ) );
+   const vec3 n_axis(ViewMatrix[0][2], ViewMatrix[1][2], ViewMatrix[2][2]);
+   ViewMatrix = translate( ViewMatrix, -MoveSensitivity * n_axis );
+   updateCamera();
 }
 
 void CameraGL::moveLeft()
 {
-   ViewMatrix = translate( ViewMatrix, MOVE_SENSITIVITY * vec3( 1.0f, 0.0f, 0.0f ) );
+   const vec3 u_axis(ViewMatrix[0][0], ViewMatrix[1][0], ViewMatrix[2][0]);
+   ViewMatrix = translate( ViewMatrix, MoveSensitivity * u_axis );
+   updateCamera();
 }
 
 void CameraGL::moveRight()
 {
-   ViewMatrix = translate( ViewMatrix, MOVE_SENSITIVITY * vec3( -1.0f, 0.0f, 0.0f ) );
+   const vec3 u_axis(ViewMatrix[0][0], ViewMatrix[1][0], ViewMatrix[2][0]);
+   ViewMatrix = translate( ViewMatrix, -MoveSensitivity * u_axis );
+   updateCamera();
 }
 
 void CameraGL::moveUp()
 {
-   ViewMatrix = translate( ViewMatrix, MOVE_SENSITIVITY * vec3( 0.0f, -1.0f, 0.0f ) );
+   const vec3 v_axis(ViewMatrix[0][1], ViewMatrix[1][1], ViewMatrix[2][1]);
+   ViewMatrix = translate( ViewMatrix, -MoveSensitivity * v_axis );
+   updateCamera();
 }
 
 void CameraGL::moveDown()
 {
-   ViewMatrix = translate( ViewMatrix, MOVE_SENSITIVITY * vec3( 0.0f, 1.0f, 0.0f ) );
+   const vec3 v_axis(ViewMatrix[0][1], ViewMatrix[1][1], ViewMatrix[2][1]);
+   ViewMatrix = translate( ViewMatrix, MoveSensitivity * v_axis );
+   updateCamera();
 }
 
 void CameraGL::zoomIn()
 {
    if (FOV > 0.0f) {
-      FOV -= ZOOM_SENSITIVITY;
+      FOV -= ZoomSensitivity;
       ProjectionMatrix = perspective( radians( FOV ), AspectRatio, NearPlane, FarPlane );
    }
 }
@@ -90,13 +112,14 @@ void CameraGL::zoomIn()
 void CameraGL::zoomOut()
 {
    if (FOV < 90.0f) {
-      FOV += ZOOM_SENSITIVITY;
+      FOV += ZoomSensitivity;
       ProjectionMatrix = perspective( radians( FOV ), AspectRatio, NearPlane, FarPlane );
    }
 }
 
 void CameraGL::resetCamera()
 {
+   CamPos = InitCamPos; 
    ViewMatrix = lookAt( InitCamPos, InitRefPos, InitUpVec );
    ProjectionMatrix = perspective( radians( InitFOV ), AspectRatio, NearPlane, FarPlane );
 }
@@ -153,9 +176,6 @@ void ObjectGL::prepareVertexBuffer(const int& n_bytes_per_vertex)
    glBindBuffer( GL_ARRAY_BUFFER, ObjVBO );
    glVertexAttribPointer( VertexLoc, 3, GL_FLOAT, GL_FALSE, n_bytes_per_vertex, bufferOffset( 0 ) );
    glEnableVertexAttribArray( VertexLoc );
-
-   glBindBuffer( GL_ARRAY_BUFFER, 0 );
-   glBindVertexArray( 0 );
 }
 
 void ObjectGL::setObject(

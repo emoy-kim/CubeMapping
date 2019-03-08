@@ -9,9 +9,9 @@ using namespace glm;
 
 class CameraGL
 {
-   const float ZOOM_SENSITIVITY;
-   const float MOVE_SENSITIVITY;
-   const float ROTATE_SENSITIVITY;
+   const float ZoomSensitivity;
+   const float MoveSensitivity;
+   const float RotationSensitivity;
    bool IsMoving;
    float AspectRatio;
    float InitFOV;
@@ -20,7 +20,7 @@ class CameraGL
 
 public:
    float FOV;
-   vec3 CamPos, RefPos, UpVec;
+   vec3 CamPos;
    mat4 ViewMatrix, ProjectionMatrix;
 
    CameraGL();
@@ -35,6 +35,7 @@ public:
 
    bool getMovingState() const;
    void setMovingState(bool is_moving);
+   void updateCamera();
    void pitch(int angle);
    void yaw(int angle);
    void moveForward();
