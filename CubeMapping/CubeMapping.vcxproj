@@ -148,6 +148,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CubeMapping.h" />
+    <ClInclude Include="OpenCVLinker.h" />
+    <ClInclude Include="OpenGLLinker.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

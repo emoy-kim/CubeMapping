@@ -28,7 +28,7 @@ public:
       const vec3& cam_position,
       const vec3& view_reference_position,
       const vec3& view_up_vector,
-      float fov = 30.0f,
+      float fov = 70.0f,
       float near_plane = 1.0f,
       float far_plane = 10000.0f
    );
@@ -36,14 +36,15 @@ public:
    bool getMovingState() const;
    void setMovingState(bool is_moving);
    void updateCamera();
-   void pitch(int angle);
-   void yaw(int angle);
-   void moveForward();
-   void moveBackward();
-   void moveLeft();
-   void moveRight();
-   void moveUp();
-   void moveDown();
+   void pitch(const int& angle);
+   void yaw(const int& angle);
+   void rotateAroundWorldY(const int& angle);
+   void moveForward(const int& delta = 1);
+   void moveBackward(const int& delta = 1);
+   void moveLeft(const int& delta = 1);
+   void moveRight(const int& delta = 1);
+   void moveUp(const int& delta = 1);
+   void moveDown(const int& delta = 1);
    void zoomIn();
    void zoomOut();
    void resetCamera();

@@ -2,7 +2,7 @@
 
 int main()
 {
-   CubeMapping CubeMapper(true);
+   CubeMapping CubeMapper(false);
    CubeMapper.play();
 
    return 0;
