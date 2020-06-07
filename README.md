@@ -7,15 +7,6 @@
 
 
 
-## Test Environment
-  * Windows 10
-  * Visual Studio 2017
-  * Surface Book 2
-  
-## Library Dependencies
-  * OpenCV
-  * OpenGL
-
 ## Keyboard Commands
   * **i key**: reset the main camera
   * **w key**: move up
